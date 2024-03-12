@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/categorias")
@@ -43,16 +44,17 @@ public class CategoriaResource {
 
     @PutMapping("/{idCategoria}")
     public ResponseEntity<Categoria> atualizarCategoria(@PathVariable("idCategoria") Integer idCategoria, @RequestBody Categoria categoria) {
-        if (!categoriaService.buscarCategoria(idCategoria).isPresent()) {
+        Optional<Categoria> categoriaOptional = categoriaService.buscarCategoria(idCategoria);
+        if (!categoriaOptional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        categoria.setIdCategoria(idCategoria);
-        Categoria novaCategoria = categoriaService.atualizarCategoria(categoria);
-        return new ResponseEntity<>(novaCategoria, HttpStatus.OK);
+        Categoria categoriaExistente = categoriaOptional.get();
+        categoriaExistente.setNomeCategoria(categoria.getNomeCategoria());
+        Categoria categoriaAtualizada = categoriaService.atualizarCategoria(categoriaExistente);
+        return new ResponseEntity<>(categoriaAtualizada, HttpStatus.OK);
     }
     }
 
 
 
 
-}

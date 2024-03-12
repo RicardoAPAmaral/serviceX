@@ -15,7 +15,7 @@ public class Categoria {
     @Column(name="ID_CATEGORIA")
     private Integer idCategoria;
     @Column(name="NOME_CATEGORIA")
-    private String nomeCategora;
+    private String nomeCategoria;
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Servico> servicos;
 
@@ -24,7 +24,7 @@ public class Categoria {
 
     public Categoria(Integer idCategoria, String nomeCategora, List<Servico> servicos) {
         this.idCategoria = idCategoria;
-        this.nomeCategora = nomeCategora;
+        this.nomeCategoria = nomeCategora;
         this.servicos = servicos;
     }
 }

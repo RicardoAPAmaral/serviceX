@@ -26,6 +26,6 @@ public class Servico {
     private Double valor;
     @ManyToOne
     @JoinColumn(name = "idCategoria")
-    private List<Categoria> categoria;
+    private Categoria categoria;
 
 }
