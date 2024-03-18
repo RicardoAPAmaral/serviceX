@@ -1,0 +1,6 @@
+br\com\ricardoamaral\servicex\categoria\domain\Categoria.class
+br\com\ricardoamaral\servicex\categoria\services\CategoriaService.class
+br\com\ricardoamaral\servicex\categoria\repositories\CategoriaRepository.class
+br\com\ricardoamaral\servicex\categoria\resources\CategoriaResource.class
+br\com\ricardoamaral\servicex\ServicexApplication.class
+br\com\ricardoamaral\servicex\servico\domain\Servico.class

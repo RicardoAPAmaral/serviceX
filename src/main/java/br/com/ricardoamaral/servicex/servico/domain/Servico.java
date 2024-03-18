@@ -21,11 +21,12 @@ public class Servico {
     @Column(name = "ID_SERViCO")
     private  Integer idServico;
     @Column(name = "NOME_SERViCO")
-    private  String nome;
+    private  String nomeServico;
     @Column(name = "VALOR_SERViCO")
     private Double valor;
     @ManyToOne
     @JoinColumn(name = "idCategoria")
     private Categoria categoria;
+
 
 }
