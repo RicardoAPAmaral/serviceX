@@ -2,6 +2,7 @@ package br.com.ricardoamaral.servicex.servico.domain;
 
 import br.com.ricardoamaral.servicex.categoria.domain.Categoria;
 import br.com.ricardoamaral.servicex.ordemServico.domain.OrdemServico;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Servico {
     @ManyToOne
     @JoinColumn(name = "idCategoria")
     private Categoria categoria;
+    @JsonIgnore
     @ManyToMany
     private List<OrdemServico>ordemServicos;
 

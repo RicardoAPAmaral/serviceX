@@ -27,7 +27,7 @@ public class OrdemServico {
     @Column(name = "VALOR_OS")
     private Double valorOS;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ordemServico")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ordemservico")
     private Pagamento pagamento;
 
     @ManyToMany
