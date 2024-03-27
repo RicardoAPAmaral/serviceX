@@ -1,11 +1,10 @@
 package br.com.ricardoamaral.servicex.pagamento.domain;
 
-import br.com.ricardoamaral.servicex.ordemServico.domain.OrdemServico;
+import br.com.ricardoamaral.servicex.ordemDeServico.domain.OrdemDeServico;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,8 +28,8 @@ public class PagamentoBoleto extends Pagamento {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private Date dataPagamento;
 
-    public PagamentoBoleto(Integer idPagamento, StatusPagamento statusPagamento, OrdemServico ordemServico, Date dataVencimento, Date dataPagamento) {
-        super(idPagamento, statusPagamento, ordemServico);
+    public PagamentoBoleto(Integer idPagamento, StatusPagamento statusPagamento, OrdemDeServico ordemDeServico, Date dataVencimento, Date dataPagamento) {
+        super(idPagamento, statusPagamento, ordemDeServico);
         this.dataVencimento = dataVencimento;
         this.dataPagamento = dataPagamento;
     }

@@ -1,7 +1,7 @@
 package br.com.ricardoamaral.servicex.servico.domain;
 
 import br.com.ricardoamaral.servicex.categoria.domain.Categoria;
-import br.com.ricardoamaral.servicex.ordemServico.domain.OrdemServico;
+import br.com.ricardoamaral.servicex.ordemDeServico.domain.OrdemDeServico;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,18 +20,23 @@ import java.util.List;
 public class Servico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_SERViCO")
+    @Column(name = "ID_SERVICO")
     private  Integer idServico;
-    @Column(name = "NOME_SERViCO")
+    @Column(name = "NOME_SERVICO")
     private  String nomeServico;
-    @Column(name = "VALOR_SERViCO")
+    @Column(name = "VALOR_SERVICO")
     private Double valor;
     @ManyToOne
     @JoinColumn(name = "idCategoria")
     private Categoria categoria;
     @JsonIgnore
     @ManyToMany
-    private List<OrdemServico>ordemServicos;
+    @JoinTable(
+            name = "SERVICO_OS",
+            joinColumns = @JoinColumn(name = "ID_SERVICO"),
+            inverseJoinColumns = @JoinColumn(name = "ID_OS")
+    )
+    private List<OrdemDeServico> ordemDeServicos;
 
 
 }

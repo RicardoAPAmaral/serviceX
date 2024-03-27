@@ -1,4 +1,4 @@
-package br.com.ricardoamaral.servicex.ordemServico.domain;
+package br.com.ricardoamaral.servicex.ordemDeServico.domain;
 
 import br.com.ricardoamaral.servicex.pagamento.domain.Pagamento;
 import br.com.ricardoamaral.servicex.servico.domain.Servico;
@@ -15,26 +15,25 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "ORDEMDESERVICOS")
-public class OrdemServico {
+public class OrdemDeServico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_OS")
     private Integer idOS;
-    @Column(name = "DATA_SOLICITACAO")
 
+    @Column(name = "DATA_SOLICITACAO")
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private Date dataSolicitacao;
 
     @Column(name = "VALOR_OS")
     private Double valorOS;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ordemservico")
-    private Pagamento pagamento;
+    @OneToOne(mappedBy = "ordemDeServico", cascade = CascadeType.ALL)
+    private Pagamento pagamento; // Corrigido para "pagamento"
 
     @ManyToMany
     @JoinTable(name = "SERVICO_OS",
             joinColumns = @JoinColumn(name = "ID_OS"),
             inverseJoinColumns = @JoinColumn(name = "ID_SERVICO"))
     private Set<Servico> servicos;
-
 }
-
