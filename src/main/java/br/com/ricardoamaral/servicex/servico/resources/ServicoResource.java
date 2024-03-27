@@ -25,7 +25,7 @@ public class ServicoResource {
 
     }
     @GetMapping
-    public ResponseEntity<List<Servico>> listarServico() {
+    public ResponseEntity<List<Servico>> listarServicos() {
         List<Servico> servicos = servicoService.listarServico();
         return new ResponseEntity<>(servicos, HttpStatus.OK);
     }
@@ -37,6 +37,7 @@ public class ServicoResource {
                 .map(servico -> new ResponseEntity<>(servico, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
 
     @DeleteMapping("/{idServico}")
     public ResponseEntity<Void> deletarServico(@PathVariable("idServico") Integer idServico) {

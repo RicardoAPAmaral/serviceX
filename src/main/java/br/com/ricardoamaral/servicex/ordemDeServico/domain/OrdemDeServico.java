@@ -3,6 +3,7 @@ package br.com.ricardoamaral.servicex.ordemDeServico.domain;
 import br.com.ricardoamaral.servicex.pagamento.domain.Pagamento;
 import br.com.ricardoamaral.servicex.servico.domain.Servico;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class OrdemDeServico {
     private Pagamento pagamento; // Corrigido para "pagamento"
 
     @ManyToMany
+    @JsonIgnore
     @JoinTable(name = "SERVICO_OS",
             joinColumns = @JoinColumn(name = "ID_OS"),
             inverseJoinColumns = @JoinColumn(name = "ID_SERVICO"))
