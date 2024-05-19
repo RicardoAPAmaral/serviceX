@@ -1,60 +1,124 @@
 package br.com.ricardoamaral.servicex.categoria.resources;
 
 import br.com.ricardoamaral.servicex.categoria.domain.Categoria;
+import br.com.ricardoamaral.servicex.categoria.domain.CategoriaDTO;
+import br.com.ricardoamaral.servicex.categoria.domain.CategoriaDTOResponse;
 import br.com.ricardoamaral.servicex.categoria.services.CategoriaService;
+import br.com.ricardoamaral.servicex.exceptios.NomeCategoriaJaExistenteException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/categorias")
+@Tag(name = "Manter Categoria", description = "CRUD CATEGORIA (respostas às requisições)")
 public class CategoriaResource {
+
     @Autowired
     private CategoriaService categoriaService;
+
+    @Operation(summary = "Cadastrar Categoria", description = "CADASTRO DE NOMES NÃO REPETIDOS.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Cadastro realizado com sucesso",
+                    content = @Content(
+                            examples = @ExampleObject(value = "{\n" +
+                                    "  \"idCategoria\": 5,\n" +
+                                    "  \"nomeCategoria\": \"Marketing\",\n" +
+                                    "  \"mensagem\": \"Cadastro realizado com sucesso\"\n" +
+                                    "}")
+                    )),
+            @ApiResponse(responseCode = "400", description = "NOME JÁ CADASTRADO",
+                    content = @Content(
+                            examples = @ExampleObject(value = "{\"message\": \"Já existe uma categoria com o mesmo nome\"}")
+                    )),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado"),
+            @ApiResponse(responseCode = "403", description = "Rota exclusiva para administradores (administrador = true)")
+    })
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Categoria> criarCategoria(@RequestBody Categoria categoria){
-        Categoria novaCategoria =categoriaService.criarCategoria(categoria);
-        return new ResponseEntity<>(novaCategoria, HttpStatus.CREATED);
+    public ResponseEntity<?> cadastrarCategoria(@Valid @RequestBody CategoriaDTOResponse responseDTO){
+        try {
+            Categoria categoria = categoriaService.fromDTOResponse(responseDTO);
+            var novacategoria = categoriaService.criarCategoria(categoria);
 
+            CategoriaDTO resposta = new CategoriaDTO();
+            resposta.setMensagem("Cadastro realizado com sucesso");
+            resposta.setIdCategoria(novacategoria.getIdCategoria());
+            resposta.setNomeCategoria(novacategoria.getNomeCategoria());
+
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
+                    .buildAndExpand(categoria.getIdCategoria()).toUri();
+            return  ResponseEntity.created(uri).body(resposta);
+        } catch (NomeCategoriaJaExistenteException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\n" +
+                            "  \"message\": \"Já existe uma categoria com esse nome\"\n" +
+                            "}");
+        }
     }
+
+
+    @Operation(summary = "Listar Categoria", description = "O recurso listar todas as categorias.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucesso"),
+            @ApiResponse(responseCode = "404", description = "Não encontrado")
+    })
+
     @GetMapping
-    public ResponseEntity<List<Categoria>> listarCategoria() {
-        List<Categoria> categorias = categoriaService.listarCategoria();
-        return new ResponseEntity<>(categorias, HttpStatus.OK);
+    public ResponseEntity<List<CategoriaDTO>> listarCategorias(){
+        List<Categoria> listaCategorias = categoriaService.listarCategorias();
+        List<CategoriaDTO> listaDTO = listaCategorias.stream().map(CategoriaDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok().body(listaDTO);
     }
 
-
+    @Operation(summary = "Buscar Categoria", description = "O recurso permite buscar uma categoria pelo ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucesso"),
+            @ApiResponse(responseCode = "404", description = "Não encontrado")
+    })
     @GetMapping("/{idCategoria}")
-    public ResponseEntity<Categoria> buscarCategoria(@PathVariable("idCategoria") Integer idCategoria) {
-        return categoriaService.buscarCategoria(idCategoria)
-                .map(categoria -> new ResponseEntity<>(categoria, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Categoria> buscarCategoriaPorId(@PathVariable Integer idCategoria) {
+        Categoria categoria = categoriaService.buscarCategoriaPorId(idCategoria);
+        return ResponseEntity.ok().body(categoria);
     }
 
+    @Operation(summary = "Atualizar Categoria", description = "O recurso atualizat uma categoria pelo ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucesso"),
+            @ApiResponse(responseCode = "404", description = "Não encontrado")
+    })
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PutMapping("/{idCategoria}")
+    public ResponseEntity<Categoria> atualizarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, @PathVariable Integer idCategoria) {
+        Categoria categoria = categoriaService.fromDTO(categoriaDTO);
+        categoria.setIdCategoria(idCategoria);
+        categoria = categoriaService.atualizarCategoria(categoria);
+        return ResponseEntity.ok().body(categoria);
+    }
+
+    @Operation(summary = "Deletar Categoria", description = "O recurso permite deletar uma categoria pelo ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sucesso"),
+            @ApiResponse(responseCode = "404", description = "Não encontrado")
+    })
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{idCategoria}")
-    public ResponseEntity<Void> deletarCategoria(@PathVariable("idCategoria") Integer idCategoria) {
+    public ResponseEntity<Void> deletarCategoria(@PathVariable Integer idCategoria) {
         categoriaService.deletarCategoria(idCategoria);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-    @PutMapping("/{idCategoria}")
-    public ResponseEntity<Categoria> atualizarCategoria(@PathVariable("idCategoria") Integer idCategoria, @RequestBody Categoria categoria) {
-        Optional<Categoria> categoriaOptional = categoriaService.buscarCategoria(idCategoria);
-        if (!categoriaOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Categoria categoriaExistente = categoriaOptional.get();
-        categoriaExistente.setNomeCategoria(categoria.getNomeCategoria());
-        Categoria categoriaAtualizada = categoriaService.atualizarCategoria(categoriaExistente);
-        return new ResponseEntity<>(categoriaAtualizada, HttpStatus.OK);
-    }
-    }
-
-
-
-
+}

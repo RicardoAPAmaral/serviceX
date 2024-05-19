@@ -1,42 +1,45 @@
 package br.com.ricardoamaral.servicex.servico.domain;
 
 import br.com.ricardoamaral.servicex.categoria.domain.Categoria;
-import br.com.ricardoamaral.servicex.ordemDeServico.domain.OrdemDeServico;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import br.com.ricardoamaral.servicex.ordemservico.domain.OrdemServico;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "SERVICOS")
 public class Servico {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_SERVICO")
     private Integer idServico;
-
-    @Column(name = "NOME_SERVICO")
-    private String nomeServico;
-
-    @Column(name = "VALOR_SERVICO")
+    @Column(name = "NOME")
+    private String nome;
+    @Column(name = "VALOR")
     private Double valor;
-
     @ManyToOne
-    @JoinColumn(name = "idCategoria")
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
-
-    @JsonBackReference
-
-    @ManyToMany(mappedBy = "servicos")
     @JsonIgnore
-    private List<OrdemDeServico> ordemDeServicos;
+    @ManyToMany(mappedBy = "servicos")
+    private List<OrdemServico> ordemServicos;
+
+
+    public Servico(Integer idServico, String nome, Double valor, Categoria categoria) {
+        this.idServico = idServico;
+        this.nome = nome;
+        this.valor = valor;
+        this.categoria = categoria;
+    }
+
+
 }

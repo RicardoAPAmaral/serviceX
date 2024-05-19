@@ -1,16 +1,17 @@
 package br.com.ricardoamaral.servicex.servico.resources;
 
-import br.com.ricardoamaral.servicex.categoria.domain.Categoria;
-import br.com.ricardoamaral.servicex.categoria.services.CategoriaService;
 import br.com.ricardoamaral.servicex.servico.domain.Servico;
+import br.com.ricardoamaral.servicex.servico.domain.ServicoDTO;
 import br.com.ricardoamaral.servicex.servico.services.ServicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/servicos")
@@ -18,43 +19,44 @@ public class ServicoResource {
 
     @Autowired
     private ServicoService servicoService;
-    @PostMapping
-    public ResponseEntity<Servico> criarServico(@RequestBody Servico servico){
-        Servico novoServico =servicoService.criarServico(servico);
-        return new ResponseEntity<>(novoServico, HttpStatus.CREATED);
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PostMapping
+    public ResponseEntity<Servico> criarServico(@RequestBody ServicoDTO servicoDTO) {
+        Servico servico = servicoService.fromDTOService(servicoDTO);
+        servico = servicoService.criarServico(servico);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
+                .buildAndExpand(servico.getIdServico()).toUri();
+        return  ResponseEntity.created(uri).build();
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public ResponseEntity<List<Servico>> listarServicos() {
         List<Servico> servicos = servicoService.listarServico();
         return new ResponseEntity<>(servicos, HttpStatus.OK);
     }
-
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{idServico}")
-    public ResponseEntity<Servico> buscarServico(@PathVariable("idServico") Integer idServico) {
-        return servicoService.buscarServico(idServico)
-                .map(servico -> new ResponseEntity<>(servico, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Servico> buscarServico(@PathVariable Integer idServico) {
+        Servico servico = servicoService.buscarServico(idServico);
+        return ResponseEntity.ok().body(servico);
     }
 
-
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PutMapping("/{idServico}")
+    public ResponseEntity<Servico> atualizarServico(@PathVariable Integer idServico, @RequestBody ServicoDTO servicoDTO) {
+        Servico servico = servicoService.fromDTOService(servicoDTO);
+        servico.setIdServico(idServico);
+        servicoService.atualizarServico(servico);
+        return ResponseEntity.noContent().build();
+    }
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{idServico}")
-    public ResponseEntity<Void> deletarServico(@PathVariable("idServico") Integer idServico) {
+    public ResponseEntity<Void> deletarServico(@PathVariable Integer idServico) {
         servicoService.deletarServico(idServico);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 
-    @PutMapping("/{idServico}")
-    public ResponseEntity<Servico> atualizarServico(@PathVariable("idServico") Integer idServico, @RequestBody Servico servico) {
-        Optional<Servico> servicoOptional = servicoService.buscarServico(idServico);
-        if (!servicoOptional.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Servico servicoExistente = servicoOptional.get();
-        servicoExistente.setNomeServico(servico.getNomeServico());
-        Servico servicoAtualizado = servicoService.atualizarServico(servicoExistente);
-        return new ResponseEntity<>(servicoAtualizado, HttpStatus.OK);
-    }
 }
